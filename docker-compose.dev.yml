@@ -1,0 +1,28 @@
+services:
+  api:
+    build:
+      context: ./server
+      dockerfile: Dockerfile.dev
+    ports:
+      - "5000:5000"
+    environment:
+      NODE_ENV: development
+      PORT: 5000
+    volumes:
+      - ./server/src:/app/src
+      - ./server/package.json:/app/package.json
+
+  web:
+    build:
+      context: ./client
+      dockerfile: Dockerfile.dev
+    ports:
+      - "5173:5173"
+    environment:
+      VITE_API_URL: http://localhost:5000/api
+    volumes:
+      - ./client/src:/app/src
+      - ./client/index.html:/app/index.html
+      - ./client/vite.config.js:/app/vite.config.js
+    depends_on:
+      - api
