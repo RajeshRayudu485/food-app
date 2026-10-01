@@ -1,0 +1,35 @@
+services:
+  api:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    image: food-app-api:latest
+    container_name: food-app-api
+    environment:
+      NODE_ENV: production
+      PORT: 5000
+    restart: unless-stopped
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://localhost:5000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    expose:
+      - "5000"
+
+  web:
+    build:
+      context: ./client
+      dockerfile: Dockerfile.nginx
+    image: food-app-web:latest
+    container_name: food-app-web
+    ports:
+      - "8080:80"
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
